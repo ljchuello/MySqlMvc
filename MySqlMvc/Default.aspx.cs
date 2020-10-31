@@ -25,6 +25,7 @@ namespace MySqlMvc
 
                 // Evitamos el doble clic
                 UControl.EvitarDobleEnvioButton(this, btnConectar);
+                UControl.EvitarDobleEnvioButton(this, btnGenerar);
             }
         }
 

@@ -62,7 +62,7 @@ namespace MySqlMvc.Libreria
                     stringBuilder.AppendLine($"                        mySqlCommand.CommandText = $\"{{_select}} FROM `{tabla}` WHERE `Id` = @Id; \";");
                     stringBuilder.AppendLine($"                        mySqlCommand.Parameters.AddWithValue(\"@Id\", id);");
                     stringBuilder.AppendLine($"                        MySqlDataReader mySqlDataReader = mySqlCommand.ExecuteReader();");
-                    stringBuilder.AppendLine($"                        if (mySqlDataReader.Read())");
+                    stringBuilder.AppendLine($"                        while (mySqlDataReader.Read())");
                     stringBuilder.AppendLine($"                        {{");
                     stringBuilder.AppendLine($"                            mo{tabla} = Maker(mySqlDataReader);");
                     stringBuilder.AppendLine($"                        }}");
@@ -121,65 +121,53 @@ namespace MySqlMvc.Libreria
 
                 #region Update Block
 
-                stringBuilder.AppendLine("");
-                stringBuilder.AppendLine($"        public string Update_Block(Mo{tabla} mo{tabla})");
-                stringBuilder.AppendLine($"        {{");
-                stringBuilder.AppendLine($"            StringBuilder stringBuilder = new StringBuilder();");
-                stringBuilder.AppendLine($"            stringBuilder.AppendLine(\"\");");
-                stringBuilder.AppendLine($"            stringBuilder.AppendLine(\"--  Update {tabla}\");");
-                stringBuilder.AppendLine($"            stringBuilder.AppendLine(\"UPDATE `{tabla}` SET\");");
-
-                // Cabecera
-                iteracion = 0;
-                var listUpdate01 = list.Where(x => x.Nombre.ToLower() != "id").ToList();
-                foreach (var row in listUpdate01)
+                if (list.Count(x => x.Nombre.ToLower() == "id") == 1)
                 {
-                    ++iteracion;
-                    stringBuilder.AppendLine(iteracion != listUpdate01.Count
-                        ? $"            stringBuilder.AppendLine($\"`{row.Nombre}` = '{{PoolConexion.Tools.Remplazar(mo{tabla}.{row.Nombre})}}', -- {row.Nombre} | {row.TipoMariaDb} | {row.TipoDotNet}\");"
-                        : $"            stringBuilder.AppendLine($\"`{row.Nombre}` = '{{PoolConexion.Tools.Remplazar(mo{tabla}.{row.Nombre})}}' -- {row.Nombre} | {row.TipoMariaDb} | {row.TipoDotNet}\");");
-                }
+                    stringBuilder.AppendLine("");
+                    stringBuilder.AppendLine($"        public string Update_Block(Mo{tabla} mo{tabla})");
+                    stringBuilder.AppendLine($"        {{");
+                    stringBuilder.AppendLine($"            StringBuilder stringBuilder = new StringBuilder();");
+                    stringBuilder.AppendLine($"            stringBuilder.AppendLine(\"\");");
+                    stringBuilder.AppendLine($"            stringBuilder.AppendLine(\"--  Update {tabla}\");");
+                    stringBuilder.AppendLine($"            stringBuilder.AppendLine(\"UPDATE `{tabla}` SET\");");
 
-                // Where
-                stringBuilder.AppendLine($"            stringBuilder.AppendLine(\"WHERE\");");
-                iteracion = 0;
-                List<Estructura> listUpdate02 = new List<Estructura>();
-                listUpdate02.Add(list.FirstOrDefault(x => x.Nombre.ToLower() == "id"));
-                foreach (var row in listUpdate02.Where(x => x != null))
-                {
-                    ++iteracion;
-                    stringBuilder.AppendLine(iteracion != listUpdate02.Count
-                        ? $"            stringBuilder.AppendLine($\"`{row.Nombre}` = '{{PoolConexion.Tools.Remplazar(mo{tabla}.{row.Nombre})}}' AND -- {row.Nombre} | {row.TipoMariaDb} | {row.TipoDotNet}\");"
-                        : $"            stringBuilder.AppendLine($\"`{row.Nombre}` = '{{PoolConexion.Tools.Remplazar(mo{tabla}.{row.Nombre})}}'; -- {row.Nombre} | {row.TipoMariaDb} | {row.TipoDotNet}\");");
-                }
+                    // Cabecera
+                    iteracion = 0;
+                    var listUpdate01 = list.Where(x => x.Nombre.ToLower() != "id").ToList();
+                    foreach (var row in listUpdate01)
+                    {
+                        iteracion = iteracion + 1;
+                        stringBuilder.AppendLine(iteracion != listUpdate01.Count
+                            ? $"            stringBuilder.AppendLine($\"`{row.Nombre}` = '{{PoolConexion.Tools.Remplazar(mo{tabla}.{row.Nombre})}}', -- {row.Nombre} | {row.TipoMariaDb} | {row.TipoDotNet}\");"
+                            : $"            stringBuilder.AppendLine($\"`{row.Nombre}` = '{{PoolConexion.Tools.Remplazar(mo{tabla}.{row.Nombre})}}' -- {row.Nombre} | {row.TipoMariaDb} | {row.TipoDotNet}\");");
+                    }
 
-                stringBuilder.AppendLine($"        return stringBuilder.ToString();");
-                stringBuilder.AppendLine($"        }}");
+                    // Where
+                    stringBuilder.AppendLine($"            stringBuilder.AppendLine(\"WHERE\");");
+                    var rowUpdate = list.FirstOrDefault(x => x.Nombre.ToLower() == "id") ?? new Estructura();
+                    stringBuilder.AppendLine($"            stringBuilder.AppendLine($\"`{rowUpdate.Nombre}` = '{{PoolConexion.Tools.Remplazar(mo{tabla}.{rowUpdate.Nombre})}}'; -- {rowUpdate.Nombre} | {rowUpdate.TipoMariaDb} | {rowUpdate.TipoDotNet}\");");
+                    stringBuilder.AppendLine($"        return stringBuilder.ToString();");
+                    stringBuilder.AppendLine($"        }}");
+                }
 
                 #endregion
 
                 #region Delete Block
 
-                stringBuilder.AppendLine("");
-                stringBuilder.AppendLine($"        public string Delete_Block(Mo{tabla} mo{tabla})");
-                stringBuilder.AppendLine($"        {{");
-                stringBuilder.AppendLine($"            StringBuilder stringBuilder = new StringBuilder();");
-                stringBuilder.AppendLine($"            stringBuilder.AppendLine(\"\");");
-                stringBuilder.AppendLine($"            stringBuilder.AppendLine(\"--  Delete {tabla}\");");
-                stringBuilder.AppendLine($"            stringBuilder.AppendLine(\"DELETE FROM `{tabla}` WHERE\");");
-
-                // Cabecera
-                iteracion = 0;
-                foreach (var row in list.Where(x => x.Where).ToList())
+                if (list.Count(x => x.Nombre.ToLower() == "id") == 1)
                 {
-                    ++iteracion;
-                    stringBuilder.AppendLine(iteracion != list.Count(x => x.Where)
-                        ? $"            stringBuilder.AppendLine($\"`{row.Nombre}` = '{{PoolConexion.Tools.Remplazar(mo{tabla}.{row.Nombre})}}' AND -- {row.Nombre} | {row.TipoMariaDb} | {row.TipoDotNet}\");"
-                        : $"            stringBuilder.AppendLine($\"`{row.Nombre}` = '{{PoolConexion.Tools.Remplazar(mo{tabla}.{row.Nombre})}}'; -- {row.Nombre} | {row.TipoMariaDb} | {row.TipoDotNet}\");");
+                    stringBuilder.AppendLine("");
+                    stringBuilder.AppendLine($"        public string Delete_Block(Mo{tabla} mo{tabla})");
+                    stringBuilder.AppendLine($"        {{");
+                    stringBuilder.AppendLine($"            StringBuilder stringBuilder = new StringBuilder();");
+                    stringBuilder.AppendLine($"            stringBuilder.AppendLine(\"\");");
+                    stringBuilder.AppendLine($"            stringBuilder.AppendLine(\"--  Delete {tabla}\");");
+                    stringBuilder.AppendLine($"            stringBuilder.AppendLine(\"DELETE FROM `{tabla}` WHERE\");");
+                    var rowDelete = list.FirstOrDefault(x => x.Nombre.ToLower() == "id") ?? new Estructura();
+                    stringBuilder.AppendLine($"            stringBuilder.AppendLine($\"`{rowDelete.Nombre}` = '{{PoolConexion.Tools.Remplazar(mo{tabla}.{rowDelete.Nombre})}}'; -- {rowDelete.Nombre} | {rowDelete.TipoMariaDb} | {rowDelete.TipoDotNet}\");");
+                    stringBuilder.AppendLine($"        return stringBuilder.ToString();");
+                    stringBuilder.AppendLine($"        }}");
                 }
-
-                stringBuilder.AppendLine($"        return stringBuilder.ToString();");
-                stringBuilder.AppendLine($"        }}");
 
                 #endregion
 
