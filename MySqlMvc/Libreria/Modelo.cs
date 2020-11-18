@@ -16,7 +16,7 @@ namespace MySqlMvc.Libreria
                 stringBuilder.AppendLine($"// Mo{tabla}.cs");
                 stringBuilder.AppendLine("using System;");
                 stringBuilder.AppendLine("");
-                stringBuilder.AppendLine("namespace Modelo");
+                stringBuilder.AppendLine("namespace DataCloud");
                 stringBuilder.AppendLine("{");
 
                 stringBuilder.AppendLine($"    /// <summary>");
@@ -26,7 +26,7 @@ namespace MySqlMvc.Libreria
                 stringBuilder.AppendLine($"    /// {DateTime.Now:yyyy-MM-dd}");
                 stringBuilder.AppendLine($"    /// </summary>");
 
-                stringBuilder.AppendLine($"    public class Mo{tabla}");
+                stringBuilder.AppendLine($"    public class {tabla}");
                 stringBuilder.AppendLine("    {");
 
                 iteracion = 0;
